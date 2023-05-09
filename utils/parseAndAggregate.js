@@ -1,8 +1,13 @@
-function parseFloatEuropean(num) {
+ export function parseFloatEuropean(num) {
+    if (num === undefined || num === null) {
+        return '0';
+      }
     return parseFloat(num.replace(',', '.'));
   }
   
-  function formatDate(dateString) {
+
+
+  export function formatDate(dateString) {
     const date = new Date(dateString);
     // format date to MM-DD-YYYYT00:00:00.000Z
     return date.toISOString().split('T')[0];

@@ -44,6 +44,13 @@ function Home() {
     setResult(parseAndAggregate(csvText));
   };
 
+  const toEuropeanFormat = (number) => {
+    if (number === undefined || number === null) {
+      return '0';
+    }
+    return number.toString().replace('.', ',');
+  };
+
   const downloadCSV = () => {
     const headers = [
       'Deposit/Withdraw',
@@ -63,15 +70,16 @@ function Home() {
       const finalBalance = parseFloat(result.finalBalances[currency]);
       const depositWithdraw = finalBalance >= 0 ? 'deposit' : 'withdraw';
       const lossGain = finalBalance >= 0 ? 'margin_gain' : 'margin_loss';
+      const fee = result.fees[currency] !== undefined ? result.fees[currency] : 0;
 
       return [
         depositWithdraw,
         tradePair,
-        result.lastDates[tradePair],
+        `"${result.lastDates[tradePair]}"`,
         currency,
-        balance,
-        result.fees[currency],
-        result.finalBalances[currency],
+        `"${toEuropeanFormat(balance)}"`,
+        `"${toEuropeanFormat(fee)}"`,
+        `"${toEuropeanFormat(result.finalBalances[currency])}"`,
         lossGain,
       ];
     });
