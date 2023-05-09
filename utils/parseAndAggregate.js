@@ -4,7 +4,12 @@ function parseFloatEuropean(num) {
   
   function formatDate(dateString) {
     const date = new Date(dateString);
-    return date.toLocaleDateString('en-US');
+    // format date to MM-DD-YYYYT00:00:00.000Z
+    return date.toISOString().split('T')[0];
+
+    // return date.toLocaleDateString('en-US');
+    // format date to MM/DD/YYYY 
+
   }
   
  export default function parseAndAggregate(csv) {

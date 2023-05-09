@@ -44,6 +44,52 @@ function Home() {
     setResult(parseAndAggregate(csvText));
   };
 
+  const downloadCSV = () => {
+    const headers = [
+      'Deposit/Withdraw',
+      'Pair',
+      'Last Transaction Date',
+      'Base Currency',
+      'Balance',
+      'Fee',
+      'Final Balance',
+      'Loss/Gain',
+    ];
+
+    const rows = Object.entries(result.balances).map(([currency, balance]) => {
+      const tradePair = Object.keys(result.lastDates).find((pair) =>
+        pair.includes(currency)
+      );
+      const finalBalance = parseFloat(result.finalBalances[currency]);
+      const depositWithdraw = finalBalance >= 0 ? 'deposit' : 'withdraw';
+      const lossGain = finalBalance >= 0 ? 'margin_gain' : 'margin_loss';
+
+      return [
+        depositWithdraw,
+        tradePair,
+        result.lastDates[tradePair],
+        currency,
+        balance,
+        result.fees[currency],
+        result.finalBalances[currency],
+        lossGain,
+      ];
+    });
+
+    let csvContent = headers.join(',') + '\n';
+    csvContent += rows.map((row) => row.join(',')).join('\n');
+
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', 'table.csv');
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+
   return (
     <div>
       <h1>CSV Aggregator</h1>
@@ -63,16 +109,21 @@ function Home() {
         </div>
         <div style={resultStyles}>
           <button onClick={handleSubmit}>Aggregate</button>
+          <button onClick={downloadCSV} style={{ marginLeft: '10px' }}>
+            Download CSV
+          </button>
           {result && (
         <table style={tableStyles}>
           <thead>
             <tr>
+              <th style={thStyles}>Deposit/Withdraw</th>
               <th style={thStyles}>Pair</th>
               <th style={thStyles}>Last Transaction Date</th>
               <th style={thStyles}>Base Currency</th>
               <th style={thStyles}>Balance</th>
               <th style={thStyles}>Fee</th>
               <th style={thStyles}>Final Balance</th>
+              <th style={thStyles}>Loss/Gain</th>
             </tr>
           </thead>
           <tbody>
@@ -80,14 +131,20 @@ function Home() {
               const tradePair = Object.keys(result.lastDates).find((pair) =>
                 pair.includes(currency)
               );
+              const finalBalance = parseFloat(result.finalBalances[currency]);
+              const depositWithdraw = finalBalance >= 0 ? 'deposit' : 'withdraw';
+              const lossGain = finalBalance >= 0 ? 'margin_gain' : 'margin_loss';
+
               return (
                 <tr key={index}>
+                  <td style={tdStyles}>{depositWithdraw}</td>
                   <td style={tdStyles}>{tradePair}</td>
                   <td style={tdStyles}>{result.lastDates[tradePair]}</td>
                   <td style={tdStyles}>{currency}</td>
                   <td style={tdStyles}>{balance}</td>
                   <td style={tdStyles}>{result.fees[currency]}</td>
                   <td style={tdStyles}>{result.finalBalances[currency]}</td>
+                  <td style={tdStyles}>{lossGain}</td>
                 </tr>
               );
             })}
